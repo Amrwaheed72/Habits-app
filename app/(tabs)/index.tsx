@@ -1,8 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
+import { Spinner } from '@/components/ui/spinner';
 import { Text } from '@/components/ui/text';
+import { useAuth } from '@/lib/auth-context';
 import { Link, Stack } from 'expo-router';
-import { MoonStarIcon, StarIcon, SunIcon } from 'lucide-react-native';
+import { LogOut, MoonStarIcon, StarIcon, SunIcon } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import * as React from 'react';
 import { Image, type ImageStyle, View } from 'react-native';
@@ -12,12 +14,6 @@ const LOGO = {
   dark: require('@/assets/images/react-native-reusables-dark.png'),
 };
 
-const SCREEN_OPTIONS = {
-  title: 'React Native Reusables',
-  headerTransparent: true,
-  headerRight: () => <ThemeToggle />,
-};
-
 const IMAGE_STYLE: ImageStyle = {
   height: 76,
   width: 76,
@@ -25,10 +21,9 @@ const IMAGE_STYLE: ImageStyle = {
 
 export default function Screen() {
   const { colorScheme } = useColorScheme();
-
+  const { signout, isLoggingOut } = useAuth();
   return (
     <>
-      <Stack.Screen options={SCREEN_OPTIONS} />
       <View className="flex-1 items-center justify-center gap-8 p-4">
         <Image source={LOGO[colorScheme ?? 'light']} style={IMAGE_STYLE} resizeMode="contain" />
         <View className="gap-2 p-4">
@@ -41,7 +36,7 @@ export default function Screen() {
         </View>
         <View className="flex-row gap-2">
           <Link href="https://reactnativereusables.com" asChild>
-            <Button variant='destructive'>
+            <Button variant="destructive">
               <Text>Browse the Docs</Text>
             </Button>
           </Link>
@@ -51,6 +46,19 @@ export default function Screen() {
               <Icon as={StarIcon} />
             </Button>
           </Link>
+        </View>
+        <View className="">
+          <Link href="/auth" asChild>
+            <Button variant="link">
+              <Text>Auth Page</Text>
+            </Button>
+          </Link>
+        </View>
+        <View>
+          <Button disabled={isLoggingOut} variant="outline" onPress={signout}>
+            <Text>Logout</Text>
+            {isLoggingOut ? <Spinner variant="ring" size="sm" /> : <LogOut size={18} />}
+          </Button>
         </View>
       </View>
     </>
@@ -62,7 +70,7 @@ const THEME_ICONS = {
   dark: MoonStarIcon,
 };
 
-function ThemeToggle() {
+export function ThemeToggle() {
   const { colorScheme, toggleColorScheme } = useColorScheme();
 
   return (
