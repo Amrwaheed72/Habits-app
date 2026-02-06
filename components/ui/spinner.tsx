@@ -130,8 +130,8 @@ export function Spinner({ size = 'md', variant = 'default', className }: Spinner
     return (
       <View
         className={cn(
-          baseClasses,
-          'animate-spin rounded-full border-2 border-muted border-t-primary'
+          'animate-spin rounded-full border-2 border-muted border-t-primary',
+          baseClasses
         )}
       />
     );
