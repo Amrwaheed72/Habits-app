@@ -9,11 +9,10 @@ interface Props {
   label: string;
   name: string;
   placeholder: string;
-  type?: KeyboardTypeOptions;
   error: string | undefined;
   classNames?: string;
 }
-const FormInput = ({ label, name, placeholder, type = 'default', error, classNames }: Props) => {
+const FormInput = ({ label, name, placeholder, error, classNames }: Props) => {
   const { control } = useFormContext();
   return (
     <View className={cn(`gap-2 p-2`, classNames)}>
@@ -23,18 +22,19 @@ const FormInput = ({ label, name, placeholder, type = 'default', error, classNam
         name={name}
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            keyboardType={type}
+            keyboardType="default"
             onBlur={onBlur}
-            onChangeText={(text) => {
-              if (type === 'number-pad') {
-                onChange(text === '' ? undefined : Number(text));
-              } else {
-                onChange(text);
-              }
-            }}
+            onChangeText={onChange}
+            // onChangeText={(text) => {
+            //   if (type === 'number-pad') {
+            //     onChange(text === '' ? undefined : Number(text));
+            //   } else {
+            //     onChange(text);
+            //   }
+            // }}
             value={value}
             placeholder={placeholder}
-            className="border-2 focus:shadow-md"
+            className="border-2 focus:border-purple-500/40 focus:shadow-md"
           />
         )}
       />

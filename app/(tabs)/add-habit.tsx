@@ -16,11 +16,12 @@ import { useAuth } from '@/lib/auth-context';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
-import { ID } from 'react-native-appwrite';
 import z from 'zod';
 import { toast } from 'sonner-native';
 import { Spinner } from '@/components/ui/spinner';
 import { useRouter } from 'expo-router';
+import useAddHabit from '@/hooks/useAddHabit';
+import { useQueryClient } from '@tanstack/react-query';
 
 const addHabitSchema = z.object({
   title: z.string().min(2, "A habit's title must have at least 2 characters"),
@@ -44,6 +45,8 @@ const FREQUENCY_OPTIONS = [
 const AddHabitScreen = () => {
   const { user } = useAuth();
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useAddHabit();
   const methods = useForm<habitSchema>({
     resolver: zodResolver(addHabitSchema),
     defaultValues: {
@@ -55,30 +58,39 @@ const AddHabitScreen = () => {
 
   const {
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     handleSubmit,
     setError,
+    reset,
   } = methods;
 
   const onSubmit = async (data: habitSchema) => {
     if (!user) return;
-    try {
-      await databases.createDocument(databaseId, collectionId, ID.unique(), {
+    const id = user?.$id;
+    mutate(
+      {
         user_id: user.$id,
         title: data.title,
         description: data.description,
         frequency: data.frequency,
         streak_count: 0,
         last_completed: new Date().toISOString(),
-      });
-      toast.success('Habit created successfully!');
-      router.back();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Something went wrong');
-      setError('root', {
-        message: error instanceof Error ? error.message : 'Something went wrong',
-      });
-    }
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['habits', id] });
+          toast.success('Habit created successfully!');
+          reset();
+          router.replace('/');
+        },
+        onError: (error) => {
+          toast.error(error.message || 'Something went wrong');
+          setError('root', {
+            message: error.message || 'Something went wrong',
+          });
+        },
+      }
+    );
   };
 
   return (
@@ -121,7 +133,7 @@ const AddHabitScreen = () => {
                     <SelectTrigger>
                       <SelectValue placeholder="Select a frequency" />
                     </SelectTrigger>
-                    <SelectContent className="w-full">
+                    <SelectContent>
                       <SelectGroup>
                         <SelectLabel>Frequency Period</SelectLabel>
                         {FREQUENCY_OPTIONS.map((opt) => (
@@ -143,10 +155,10 @@ const AddHabitScreen = () => {
           </View>
           <Button
             onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
+            disabled={isPending}
             className="mt-4 bg-purple-700 active:bg-purple-800 dark:bg-purple-500 dark:active:bg-purple-600">
             <Text className="text-white">Add Habit</Text>
-            {isSubmitting && <Spinner size="sm" variant="ring" />}
+            {isPending && <Spinner size="sm" variant="ring" />}
           </Button>
         </View>
       </KeyboardAvoidingView>

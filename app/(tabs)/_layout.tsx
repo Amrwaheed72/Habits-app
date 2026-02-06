@@ -1,7 +1,7 @@
 import '@/global.css';
 import { Tabs } from 'expo-router';
 import { ThemeToggle } from './index';
-import { Calendar, ChartLine, LogIn, PlusCircle, Sparkle } from 'lucide-react-native';
+import { Calendar, ChartLine, PlusCircle } from 'lucide-react-native';
 
 export {
   // Catch any errors thrown by the Layout component.
