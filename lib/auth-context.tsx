@@ -15,9 +15,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
+
   useEffect(() => {
     getUser();
   }, []);
+
   const getUser = async () => {
     try {
       const session = await account.get();
@@ -28,6 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     }
   };
+  
   const signIn = async (email: string, password: string) => {
     try {
       await account.createEmailPasswordSession(email, password);
